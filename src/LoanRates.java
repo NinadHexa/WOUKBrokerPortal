@@ -27,7 +27,7 @@ public class LoanRates {
 	@SuppressWarnings("deprecation")
 	public static void main(String[] args) throws InterruptedException{
 		// TODO Auto-generated method stub
-		List<CalculateModel> dataList = Poiji.fromExcel(new File("C:\\Users\\ninad.kulkarni\\Downloads\\DemoLoan.xlsx"), CalculateModel.class);
+		List<CalculateModel> dataList = Poiji.fromExcel(new File("C:\\Users\\ninad.kulkarni\\Downloads\\SampleCalculator861.xlsx"), CalculateModel.class);
 
         WebDriver driver = new ChromeDriver();
 
@@ -48,7 +48,9 @@ public class LoanRates {
         driver.findElement(By.xpath("//div[@class='slds-form-element__control slds-grow']//input[@name='password']")).sendKeys("Samiksha@2");
 
         driver.findElement(By.xpath("//div[@class='slds-m-bottom_small slds-col slds-size_12-of-12']//div[@class='slds-align_absolute-center']//button[@type='button']")).click();
-
+        
+        System.out.println("Loan Amount\tAdvance Payments\tTerm\tRisk Band\tExpected Commission\tReceived Commission\tExpected Net Yield\tReceived Net Yield\tTotal Term in Months");
+        
         for(CalculateModel data : dataList) {
 
             //Navigation to Home Page
@@ -84,8 +86,8 @@ public class LoanRates {
             //Inputs
 
             //Loan Amount(Excel Sheet)
-
-            driver.findElement(By.xpath("//div[@class='slds-form-element__control slds-grow']//input[@name='Total Loan Amount']")).sendKeys(data.getLoanAmount());
+            String LoanAmount = data.getLoanAmount();
+            driver.findElement(By.xpath("//div[@class='slds-form-element__control slds-grow']//input[@name='Total Loan Amount']")).sendKeys(LoanAmount);
 
             //Frequency (Monthly)
 
@@ -146,33 +148,25 @@ public class LoanRates {
             data.setReceivedCommission(receivedCommission);
 
             //Net Yield Percentage
-
-            wait.until(driver2 -> {
-
-                String value2 = driver2.findElement(By.xpath("//input[@name='Net Yield%']")).getAttribute("value");
-
-                return value2 != null && !value2.trim().isEmpty();
-
-            });
-
+            String expectednetYieldPercentage = data.getExpectedNetYield();
             WebElement netYieldPercentage = driver.findElement(By.xpath("//input[@name='Net Yield%'] "));
-
+//            wait.until(ExpectedConditions.attributeContains(netYieldPercentage, "value", expectednetYieldPercentage));
             String receivedNetYield = netYieldPercentage.getAttribute("value");
-
             data.setReceivedNetYield(receivedNetYield);
-
+            if(receivedNetYield == null || receivedNetYield.isEmpty()) receivedNetYield = "null";
+            
+            // Total Term in Months
             WebElement totalTerm = driver.findElement(By.xpath("//input[@name='totalTermMonth']"));
-
             String totalTerminMonth = totalTerm.getAttribute("value");
-
-            System.out.println(totalTerminMonth);
-
+            if(totalTerminMonth == null || totalTerminMonth.isEmpty()) totalTerminMonth = "null";
+            
+            System.out.println(LoanAmount+"\t\t\t"+advancePayments+"\t\t"+term+"\t"+riskBand+"\t\t\t"+expectedPercentage+"\t\t\t"+receivedCommission+"\t\t\t"+expectednetYieldPercentage+"\t\t\t"+receivedNetYield+"\t\t\t"+totalTerminMonth);
         }
 
 
         try {
 
-            FileInputStream fis = new FileInputStream("C:\\Users\\ninad.kulkarni\\Downloads\\DemoLoan.xlsx");
+            FileInputStream fis = new FileInputStream("C:\\Users\\ninad.kulkarni\\Downloads\\SampleCalculator861.xlsx");
 
             Workbook workbook = new XSSFWorkbook(fis);
 
@@ -238,7 +232,7 @@ public class LoanRates {
 
             // Write the output to the file
 
-            FileOutputStream fos = new FileOutputStream("C:\\Users\\ninad.kulkarni\\Downloads\\DemoLoan.xlsx");
+            FileOutputStream fos = new FileOutputStream("C:\\Users\\ninad.kulkarni\\Downloads\\SampleCalculator861.xlsx");
 
             workbook.write(fos);
 
